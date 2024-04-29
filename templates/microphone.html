@@ -38,16 +38,25 @@
             e.preventDefault();
             try{
                 const formdata=new FormData(this);
-                const response=await fetch('/process_intermediate',{
+                const humres=await fetch('/process_human',{
                     method:'POST',
                     body:formdata
                 });
-                if(!response.ok){
-                    throw new Error('Server error: '+response.status);
+                if(!humres.ok){
+                    throw new Error('Server error: '+humres.status);
                 }
-                const turn=await response.json();
-                document.getElementById('human').innerText+=turn.human_response;
-                document.getElementById('machine').innerText+=turn.machine_response;
+                const humtx=await humres.json();
+                document.getElementById('human').innerText+=humtx.human_response;
+
+                const machres=await fetch('/process_machine',{
+                    method:'POST',
+                    body:formdata
+                });
+                if(!machres.ok){
+                    throw new Error('Server error: '+machres.status);
+                }
+                const machtx=await machres.json();
+                document.getElementById('machine').innerText+=machtx.machine_response;
             }catch(error){
                 alert('Sorry, an error occurred: '+error.message);
             }
