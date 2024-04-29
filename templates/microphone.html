@@ -23,9 +23,22 @@
     </style>
 </head>
 <body>
-    <h1>Language is {{ language }}</h1>
+    <h1 id="heading">Language is {{ language }}</h1>
+    <div>
     <div class="machine"></div>
     <div class="mic"></div>
     <div class="human"></div>
+    </div>
+    <form action="/process_intermediate" method="post">
+        <select name="newstuff">
+            <option id="inputval" value="idek">Idek</option>
+        </select>
+        <button onclick="getheading()">getUpper</button>
+    </form>
+    <script>
+        function getheading(){
+            document.getElementById('inputval').value=document.getElementById('heading').innerHTML;
+        }
+    </script>
 </body>
 </html>

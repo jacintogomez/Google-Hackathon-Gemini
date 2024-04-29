@@ -16,5 +16,10 @@ def process_language():
 def conversation(language):
     return render_template('microphone.html',language=language)
 
+@app.route('/process_intermediate',methods=['POST'])
+def process_intermediate():
+    newstuff=request.form['newstuff'].upper()
+    return redirect(url_for('conversation',language=newstuff))
+
 if __name__ == '__main__':
     app.run(debug=True)
