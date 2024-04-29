@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import google.generativeai as genai
 from google.cloud import translate_v2 as translate
+import torch
+import sounddevice as sd
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+from scipy.io.wavfile import write
 from google.cloud import texttospeech
 from dotenv import load_dotenv
 import os
@@ -12,6 +16,28 @@ GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
 model=genai.GenerativeModel('gemini-pro')
 genai.configure(api_key=GOOGLE_API_KEY)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("TRANSLATION_CREDENTIALS_PATH")
+
+device="cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+model_id="openai/whisper-base"
+openaimodel=AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id,torch_dtype=torch_dtype,
+    use_safetensors=True
+)
+openaimodel.to(device)
+processor=AutoProcessor.from_pretrained(model_id)
+pipe=pipeline(
+    "automatic-speech-recognition",
+    model=openaimodel,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    max_new_tokens=128,
+    chunk_length_s=30,
+    batch_size=16,
+    return_timestamps=True,
+    torch_dtype=torch_dtype,
+    device=device,
+)
 
 app = Flask(__name__)
 
@@ -34,7 +60,8 @@ def conversation(language):
 
 @app.route('/process_human',methods=['POST'])
 def process_intermediate():
-    human_response=request.form['human_input']
+    #human_response=request.form['human_input']
+    human_response=human_turn()
     return jsonify(human_response=human_response)
 
 @app.route('/process_machine',methods=['POST'])
@@ -79,6 +106,21 @@ def play_audio(file):
     recordlength=int(sound.get_length()*1000)
     sound.play()
     pygame.time.wait(recordlength)
+
+def human_turn():
+    file='recordings/human.wav'
+    talk=record_audio(file)
+    # eng=translate_to(english,file)
+    # print('Me: '+talk+' ('+eng+')')
+    return talk
+
+def record_audio(filename,duration=5,fs=44100):
+    print('recording...')
+    recording=sd.rec(int(duration*fs),samplerate=fs,channels=1)
+    sd.wait()
+    write(filename,fs,recording)
+    result=pipe(filename,generate_kwargs={'language':app.config['chosenlang']})
+    return result['text']
 
 if __name__ == '__main__':
     app.run(debug=True)
