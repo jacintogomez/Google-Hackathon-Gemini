@@ -25,20 +25,33 @@
 <body>
     <h1 id="heading">Language is {{ language }}</h1>
     <div>
-    <div class="machine"></div>
-    <div class="mic"></div>
-    <div class="human"></div>
+    <div id="machine" class="machine"></div>
+    <div id="mic" class="mic"></div>
+    <div id="human" class="human"></div>
     </div>
-    <form action="/process_intermediate" method="post">
-        <select name="newstuff">
-            <option id="inputval" value="idek">Idek</option>
-        </select>
-        <button onclick="getheading()">getUpper</button>
+    <form id="human_form">
+        <input type="text" name="human_input">
+        <button type="submit">Get Response</button>
     </form>
     <script>
-        function getheading(){
-            document.getElementById('inputval').value=document.getElementById('heading').innerHTML;
-        }
+        document.querySelector('#human_form').addEventListener('submit',async function(e){
+            e.preventDefault();
+            try{
+                const formdata=new FormData(this);
+                const response=await fetch('/process_intermediate',{
+                    method:'POST',
+                    body:formdata
+                });
+                if(!response.ok){
+                    throw new Error('Server error: '+response.status);
+                }
+                const turn=await response.json();
+                document.getElementById('human').innerText+=turn.human_response;
+                document.getElementById('machine').innerText+=turn.machine_response;
+            }catch(error){
+                alert('Sorry, an error occurred: '+error.message);
+            }
+        });
     </script>
 </body>
 </html>

@@ -18,8 +18,14 @@ def conversation(language):
 
 @app.route('/process_intermediate',methods=['POST'])
 def process_intermediate():
-    newstuff=request.form['newstuff'].upper()
-    return redirect(url_for('conversation',language=newstuff))
+    human_response=request.form['human_input'].upper()
+    machine_response=human_response.lower()
+    return {'human_response':human_response,'machine_response':machine_response}
+
+@app.route('/process_machine',methods=['GET'])
+def process_machine():
+
+    return machine_response.lower()
 
 if __name__ == '__main__':
     app.run(debug=True)
