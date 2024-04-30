@@ -51,7 +51,7 @@ def index():
 def process_language():
     lang=request.form['language']
     app.config['chosenlang']=lang
-    return redirect(url_for('conversation',language=lang))
+    return redirect(url_for('conversation',language=displaylang(lang)))
 
 @app.route('/conversation/<language>',methods=['GET'])
 def conversation(language):
@@ -71,7 +71,7 @@ def process_machine():
     return jsonify(machine_response=machine_response)
 
 def generate_response(input_text):
-    prompt='Please respond logically to the following sentence in a conversation: '+input_text
+    prompt='Pretend you are a human in a conversation and respond to the following: '+input_text
     generation=model.generate_content(prompt).text
     #print(generation)
     return generation
@@ -97,9 +97,9 @@ def make_speech_file(speech_file_path,text):
     response=googclient.synthesize_speech(
         input=synthesis_input,voice=voice,audio_config=audio_config
     )
-    with open(speech_file_path, "wb") as out:
+    with open(speech_file_path,"wb") as out:
         out.write(response.audio_content)
-        print('Audio content written to file "output.mp3"')
+        print('Audio content written to '+speech_file_path)
 
 def play_audio(file):
     sound=pygame.mixer.Sound(file)
@@ -121,6 +121,34 @@ def record_audio(filename,duration=5,fs=44100):
     write(filename,fs,recording)
     result=pipe(filename,generate_kwargs={'language':app.config['chosenlang']})
     return result['text']
+
+def displaylang(l):
+    c=0
+    if l=='en':
+        c='English'
+    elif l=='es':
+        c='Spanish'
+    elif l=='fr':
+        c='French'
+    elif l=='zh':
+        c='Chinese (Mandarin)'
+    elif l=='ru':
+        c='Russian'
+    elif l=='ar':
+        c='Arabic'
+    elif l=='pt':
+        c='Portuguese'
+    elif l=='ja':
+        c='Japanese'
+    elif l=='de':
+        c='German'
+    elif l=='ko':
+        c='Korean'
+    elif l=='th':
+        c='Thai'
+    elif l=='hi':
+        c='Hindi'
+    return c
 
 if __name__ == '__main__':
     app.run(debug=True)
