@@ -2,36 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Microphone</title>
+    <title>{{ language }} Chat</title>
     <style>
         body{
             display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
             margin: 2%;
+            text-align: center;
             justify-content: center;
             align-items: center;
             height: 100vh;
             width: 100vw;
-            {#background: radial-gradient(circle,gray,black);#}
+            background: radial-gradient(circle,#ffffff,#bfbfbf);
+            color: black;
         }
         .mic{
             background-color: tan;
             height: 100px;
             width: 100px;
             border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
         }
-        {}
+        .response{
+            flex: 1;
+            width: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
-    <h1 id="heading">Language is {{ language }}</h1>
-    <div>
-    <div id="machine" class="machine"></div>
-    <div id="mic" class="mic"></div>
-    <div id="human" class="human"></div>
-    </div>
+        <div id="machine" class="response">machine text</div>
+        <div id="mic" class="mic">Record</div>
+        <div id="human" class="response">human text</div>
     <form id="human_form">
-        <input type="text" name="human_input">
-        <button type="submit">Get Response</button>
+        <button type="submit">Record</button>
     </form>
     <script>
         document.querySelector('#human_form').addEventListener('submit',async function(e){
