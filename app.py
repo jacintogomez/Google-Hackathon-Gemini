@@ -6,6 +6,8 @@ import sounddevice as sd
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from scipy.io.wavfile import write
 from google.cloud import texttospeech
+import vertexai
+from vertexai.generative_models import GenerativeModel, ChatSession
 from dotenv import load_dotenv
 import os
 import time
@@ -13,9 +15,20 @@ import pygame
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
-model=genai.GenerativeModel('gemini-pro')
-genai.configure(api_key=GOOGLE_API_KEY)
+# model=genai.GenerativeModel('gemini-pro')
+# genai.configure(api_key=GOOGLE_API_KEY)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("TRANSLATION_CREDENTIALS_PATH")
+
+project_id=os.getenv("CLOUD_PROJECT_ID")
+location=os.getenv("CLOUD_PROJECT_LOCATION")
+vertexai.init(project=project_id, location=location)
+model=GenerativeModel(
+    model_name="gemini-1.0-pro-002",
+    system_instruction=[
+        "Keep the conversation going as if you were a human. Give a brief response of about 1-2 sentences in the same language that the input is given in",
+    ],
+)
+chat=model.start_chat(response_validation=False)
 
 device="cuda:0" if torch.cuda.is_available() else "cpu"
 torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
@@ -41,7 +54,8 @@ pipe=pipeline(
 
 app = Flask(__name__)
 
-app.config['chosenlang']='en' #this will change during execution
+app.config['chosenlang']='en' #these will both change during execution
+app.config['temp_msg']='Hello, how are you today?'
 
 @app.route('/')
 def index():
@@ -62,17 +76,27 @@ def conversation(language):
 def process_intermediate():
     #human_response=request.form['human_input']
     human_response=human_turn()
+    app.config['temp_msg']=human_response
     return jsonify(human_response=human_response)
 
 @app.route('/process_machine',methods=['POST'])
 def process_machine():
-    machinput=request.form['human_input']
+    machinput=app.config['temp_msg']
     machine_response=machine_turn(machinput)
     return jsonify(machine_response=machine_response)
 
+def get_chat_response(chat: ChatSession,prompt: str) -> str:
+    text_response=[]
+    print('prompt: '+prompt)
+    responses=chat.send_message(prompt,stream=True)
+    print('responses: ',responses,type(responses))
+    for chunk in responses:
+        text_response.append(chunk.text)
+    return "".join(text_response)
+
 def generate_response(input_text):
-    prompt='Pretend you are a human in a conversation and respond to the following: '+input_text
-    generation=model.generate_content(prompt).text
+    print('chat: ',chat,type(chat))
+    generation=get_chat_response(chat,input_text)
     #print(generation)
     return generation
 
