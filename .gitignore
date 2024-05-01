@@ -2,3 +2,5 @@
 pipinstalls.txt
 recordings
 google-cloud-sdk
+session/*
+!session/.gitkeep

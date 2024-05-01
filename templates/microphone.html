@@ -62,7 +62,7 @@
             <button id="stop" class="stop">Stop Session</button>
         </div>
         <button id="download" class="download">Download Transcript</button>
-        <a href="/static/trans.txt" download>
+        <a href="/session/trans.txt" download>
             Download Transcript
         </a>
     </div>
@@ -79,7 +79,7 @@
                     throw new Error('Server error: '+humres.status);
                 }
                 const humtx=await humres.json();
-                document.getElementById('human').innerText+=humtx.human_response;
+                document.getElementById('human').innerText=humtx.human_response;
 
                 const machres=await fetch('/process_machine',{
                     method:'POST',
@@ -89,7 +89,7 @@
                     throw new Error('Server error: '+machres.status);
                 }
                 const machtx=await machres.json();
-                document.getElementById('machine').innerText+=machtx.machine_response;
+                document.getElementById('machine').innerText=machtx.machine_response;
             }catch(error){
                 alert('Sorry, an error occurred: '+error.message);
             }

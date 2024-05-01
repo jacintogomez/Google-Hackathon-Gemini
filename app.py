@@ -54,8 +54,9 @@ pipe=pipeline(
 
 app = Flask(__name__)
 
-app.config['chosenlang']='en' #these will both change during execution
-app.config['temp_msg']='Hello, how are you today?'
+app.config['chosenlang']='en' #this will change during execution
+app.config['temp_msg']='Hello, how are you today?' #this too
+app.config['transpath']='session/trans.txt'
 
 @app.route('/')
 def index():
@@ -69,6 +70,7 @@ def process_language():
 
 @app.route('/conversation/<language>',methods=['GET'])
 def conversation(language):
+    cleartranscript()
     pygame.init()
     return render_template('microphone.html',language=language)
 
@@ -103,6 +105,7 @@ def generate_response(input_text):
 def machine_turn(text):
     machine_file='recordings/machine.wav'
     talk=generate_response(text)
+    updatetrans(talk,False)
     make_speech_file(machine_file,talk)
     #eng=translate_to(english,machine_file)
     play_audio(machine_file)
@@ -134,6 +137,7 @@ def play_audio(file):
 def human_turn():
     file='recordings/human.wav'
     talk=record_audio(file)
+    updatetrans(talk,True)
     # eng=translate_to(english,file)
     # print('Me: '+talk+' ('+eng+')')
     return talk
@@ -145,6 +149,19 @@ def record_audio(filename,duration=5,fs=44100):
     write(filename,fs,recording)
     result=pipe(filename,generate_kwargs={'language':app.config['chosenlang']})
     return result['text']
+
+def updatetrans(line,isme):
+    pre=''
+    if isme:
+        pre='Me: '
+    else:
+        pre='Machine: '
+    with open(app.config['transpath'],'a') as file:
+        file.write(pre+line+'\n')
+    print('Updated transcript file')
+
+def cleartranscript():
+    open(app.config['transpath'], 'w').close()
 
 def displaylang(l):
     c=0
