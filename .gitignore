@@ -4,3 +4,4 @@ recordings
 google-cloud-sdk
 session/*
 !session/.gitkeep
+session/trans.txt
