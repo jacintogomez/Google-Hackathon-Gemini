@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import google.generativeai as genai
 from google.cloud import translate_v2 as translate
 import torch
@@ -25,7 +25,7 @@ vertexai.init(project=project_id, location=location)
 model=GenerativeModel(
     model_name="gemini-1.0-pro-002",
     system_instruction=[
-        "Keep the conversation going as if you were a human. Give a brief response of about 1-2 sentences in the same language that the input is given in",
+        "You are a human in a voice conversation with someone, keep the conversation going. Give a brief response of about 1-2 sentences in the same language that the input is given in. No emojis since this is verbal",
     ],
 )
 chat=model.start_chat(response_validation=False)
@@ -56,7 +56,7 @@ app = Flask(__name__)
 
 app.config['chosenlang']='en' #this will change during execution
 app.config['temp_msg']='Hello, how are you today?' #this too
-app.config['transpath']='session/trans.txt'
+app.config['transpath']='static/trans.txt'
 
 @app.route('/')
 def index():
@@ -66,13 +66,13 @@ def index():
 def process_language():
     lang=request.form['language']
     app.config['chosenlang']=lang
-    return redirect(url_for('conversation',language=displaylang(lang)))
+    return redirect(url_for('conversation',language=lang))
 
 @app.route('/conversation/<language>',methods=['GET'])
 def conversation(language):
     cleartranscript()
     pygame.init()
-    return render_template('microphone.html',language=language)
+    return render_template('microphone.html',language=displaylang(language))
 
 @app.route('/process_human',methods=['POST'])
 def process_intermediate():
@@ -85,7 +85,14 @@ def process_intermediate():
 def process_machine():
     machinput=app.config['temp_msg']
     machine_response=machine_turn(machinput)
+    print('machine response: ',machine_response)
     return jsonify(machine_response=machine_response)
+
+@app.route('/session/trans.txt')
+def download_transcript():
+    tpath=app.config['transpath']
+    if os.path.exists(tpath):
+        return send_file(tpath,attachment_filename='transcript.txt',as_attachment=True)
 
 def get_chat_response(chat: ChatSession,prompt: str) -> str:
     text_response=[]
@@ -138,6 +145,7 @@ def human_turn():
     file='recordings/human.wav'
     talk=record_audio(file)
     updatetrans(talk,True)
+    print('human response: ',talk)
     # eng=translate_to(english,file)
     # print('Me: '+talk+' ('+eng+')')
     return talk
@@ -157,11 +165,11 @@ def updatetrans(line,isme):
     else:
         pre='Machine: '
     with open(app.config['transpath'],'a') as file:
-        file.write(pre+line+'\n')
+        file.write(pre+line+'\n'+'\n')
     print('Updated transcript file')
 
 def cleartranscript():
-    open(app.config['transpath'], 'w').close()
+    open(app.config['transpath'],'w').close()
 
 def displaylang(l):
     c=0

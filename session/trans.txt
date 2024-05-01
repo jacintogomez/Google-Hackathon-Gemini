@@ -1,4 +1,0 @@
-Me:  Hi, how's it going today?
-Machine: The weather is sunny and warm, and I'm looking forward to a productive day. How about you?
-Me:  I'm working on my assignment right now.
-Machine: That's great! What are you working on?

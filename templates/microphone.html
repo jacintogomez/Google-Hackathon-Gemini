@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ language }} Chat</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles.css') }}">
     <style>
         body{
             display: flex;
@@ -62,7 +63,7 @@
             <button id="stop" class="stop">Stop Session</button>
         </div>
         <button id="download" class="download">Download Transcript</button>
-        <a href="/session/trans.txt" download>
+        <a href="/static/trans.txt" download>
             Download Transcript
         </a>
     </div>
