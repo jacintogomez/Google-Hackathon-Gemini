@@ -116,8 +116,8 @@
 </head>
 <body>
     <div class="split-left" style="border: 1px solid #cccccc;">
-        <div id="machine" class="response">machine text is displayed here</div>
-        <div id="human" class="response">human text is displayed here</div>
+        <div id="machine" class="response"></div>
+        <div id="human" class="response"></div>
     </div>
     <div class="split-right" style="border: 1px solid #cccccc;">
         <form id="mic" class="mic">
@@ -125,18 +125,15 @@
             <div id="rec">Record</div>
         </form>
         <div>
-            <form id="human_form">
-                <button type="submit">Record</button>
-            </form>
             <form id="stop">
                 <button id="stop" class="stop" type="submit">Stop Session</button>
             </form>
+            <a href="/static/trans.txt" download>
+                <button id="download" style="opacity:50%;">
+                    Download Transcript
+                </button>
+            </a>
         </div>
-        <a href="/static/trans.txt" download>
-            <button>
-                Download Transcript
-            </button>
-        </a>
     </div>
     <script>
         let mt=document.getElementById('machine');
@@ -172,7 +169,9 @@
                 alert('Sorry, an error occurred: '+error.message);
             }
         });
-        document.querySelector('#stop').addEventListener('submit',async function(){
+        document.querySelector('#stop').addEventListener('submit',async function(e){
+            e.preventDefault();
+            document.getElementById('download').style.opacity='100%';
             fetch('/stop_session');
         });
         function typedisplay(msg,element){
