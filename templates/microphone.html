@@ -64,29 +64,25 @@
             animation: none;
             animation-name: none;
         }
+        #cursor{
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            animation: blink-caret 0.75s infinite;
+        }
         @keyframes mach{
-            from{
-                transform: translateY(0);
-            }
-            50%{
-                transform: translateY(-250px);
-            }
-            to{
-                transform: translateY(0);
-            }
+            from{transform: translateY(0);}
+            50%{transform: translateY(-250px);}
+            to{transform: translateY(0);}
         }
         @keyframes hum{
-            from{
-                transform: translateY(0);
-            }
-            50%{
-                transform: translateY(250px);
-            }
-            to{
-                transform: translateY(0);
-            }
+            from{transform: translateY(0);}
+            50%{transform: translateY(250px);}
+            to{transform: translateY(0);}
         }
-        {}
+        @keyframes blink-caret{
+            50%{opacity: 0;}
+        }
     </style>
 </head>
 <body>
@@ -125,7 +121,7 @@
                     throw new Error('Server error: '+humres.status);
                 }
                 const humtx=await humres.json();
-                document.getElementById('human').innerText=humtx.human_response;
+                typedisplay(humtx.human_response,ht);
 
                 const machres=await fetch('/process_machine',{
                     method:'POST',
@@ -135,7 +131,7 @@
                     throw new Error('Server error: '+machres.status);
                 }
                 const machtx=await machres.json();
-                document.getElementById('machine').innerText=machtx.machine_response;
+                typedisplay(machtx.machine_response,mt);
                 fetch('/machine_speak')
             }catch(error){
                 alert('Sorry, an error occurred: '+error.message);
@@ -144,20 +140,18 @@
         document.querySelector('#stop').addEventListener('submit',async function(){
             fetch('/stop_session');
         });
-        function updown(){
-            mt.style.animation='mach 1s ease-out';
-            ht.style.animation='none';
+        function typedisplay(msg,element){
+            element.textContent='';
+            let i=0;
+            const interval=setInterval(()=>{
+                if(i<msg.length){
+                    element.textContent+=msg[i];
+                    i++;
+                }else{
+                    clearInterval(interval);
+                }
+            },10);
         }
-        function downup(){
-            ht.style.animation='hum 1s ease-out';
-            mt.style.animation='none';
-        }
-        document.getElementById('machine').addEventListener('click',function(){
-            updown();
-        });
-        document.getElementById('human').addEventListener('click',function(){
-            downup();
-        });
     </script>
 </body>
 </html>
