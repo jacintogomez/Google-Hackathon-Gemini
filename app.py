@@ -88,11 +88,22 @@ def process_machine():
     print('machine response: ',machine_response)
     return jsonify(machine_response=machine_response)
 
+@app.route('/machine_speak')
+def machine_speak():
+    mf='recordings/machine.wav'
+    play_audio(mf)
+    return 'Audio playing'
+
 @app.route('/session/trans.txt')
 def download_transcript():
     tpath=app.config['transpath']
     if os.path.exists(tpath):
         return send_file(tpath,attachment_filename='transcript.txt',as_attachment=True)
+
+@app.route('/stop_session')
+def stop_session():
+    pygame.quit()
+    return 'Pygame session stopped'
 
 def get_chat_response(chat: ChatSession,prompt: str) -> str:
     text_response=[]
@@ -115,7 +126,7 @@ def machine_turn(text):
     updatetrans(talk,False)
     make_speech_file(machine_file,talk)
     #eng=translate_to(english,machine_file)
-    play_audio(machine_file)
+    #play_audio(machine_file)
     # print('Computer: '+talk+' ('+eng+')')
     return talk
 

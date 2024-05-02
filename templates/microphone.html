@@ -15,17 +15,25 @@
             background: radial-gradient(circle,#ffffff,#bfbfbf);
             color: black;
         }
+        button{
+            background-color: greenyellow;
+            height: 50px;
+            width: 200px;
+            border-radius: 25px;
+            border: 5px solid black;
+            margin: 5px;
+        }
         .split-left{
             display: flex;
             flex-direction: column;
-            flex: 2;
+            flex: 3;
             justify-content: space-around;
             height: 100vh;
         }
         .split-right{
             display: flex;
             flex-direction: column;
-            flex: 1;
+            flex: 2;
             justify-content: space-around;
             height: 100vh;
         }
@@ -37,6 +45,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            border: 5px solid black;
             margin: 0 auto;
         }
         .response{
@@ -51,20 +60,23 @@
 </head>
 <body>
     <div class="split-left" style="border: 1px solid #cccccc;">
-        <div id="machine" class="response">machine text</div>
-        <div id="human" class="response">human text</div>
+        <div id="machine" class="response">machine text is displayed here</div>
+        <div id="human" class="response">human text is displayed here</div>
     </div>
     <div class="split-right" style="border: 1px solid #cccccc;">
-        <div id="mic" class="mic"></div>
+        <div id="mic" class="mic">Begin</div>
         <div>
             <form id="human_form">
                 <button type="submit">Record</button>
             </form>
-            <button id="stop" class="stop">Stop Session</button>
+            <form id="stop">
+                <button id="stop" class="stop" type="submit">Stop Session</button>
+            </form>
         </div>
-        <button id="download" class="download">Download Transcript</button>
         <a href="/static/trans.txt" download>
-            Download Transcript
+            <button>
+                Download Transcript
+            </button>
         </a>
     </div>
     <script>
@@ -91,9 +103,13 @@
                 }
                 const machtx=await machres.json();
                 document.getElementById('machine').innerText=machtx.machine_response;
+                fetch('/machine_speak')
             }catch(error){
                 alert('Sorry, an error occurred: '+error.message);
             }
+        });
+        document.querySelector('#stop').addEventListener('submit',async function(e){
+            fetch('/stop_session');
         });
     </script>
 </body>
