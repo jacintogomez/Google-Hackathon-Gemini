@@ -56,7 +56,7 @@ app = Flask(__name__)
 
 app.config['chosenlang']='en' #this will change during execution
 app.config['temp_msg']='Hello, how are you today?' #this too
-app.config['transpath']='static/trans.txt'
+app.config['transpath']='session/trans.txt'
 
 @app.route('/')
 def index():
