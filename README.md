@@ -1,4 +1,4 @@
-# Google Hackathon - Foreign Language Practice
+# Google Hackathon - Foreign Language Practice Assistant
 
 Language learning apps like Duolingo are great for early stage learning, but can fall short when someone wants to reach fluency. This leaves a gray area individuals can end up in where they have outgrown the language learning apps, but are still not ready yet to effectively converse with real native speakers in a non-practice setting. 
 
@@ -6,7 +6,7 @@ This project is meant to address the issue by letting users have a verbal conver
 
 How to use:
 1. Select your language (be aware that the less widely spoken languages will not have as well-trained models, and may give weird output at times).
-2. Click "Record" and you will have 5 seconds to say what you want. After this the machine will resond, then you click record again and so on.
+2. Click "Record" and you will have 5 seconds to say what you want to the machine. After this the machine will resond, then you click record again and so on.
 3. After the conversation ends the user can download a transcript of the conversation text to their device, in case there are any new words/phrases they would like to remember.
 
 How it works:
@@ -14,3 +14,7 @@ How it works:
 - Google Translate API is used to translate into and from English.
 - OpenAI Whisper is used to convert the user's speech to text.
 - Audio is played with Pygame.
+
+Features to add in the future:
+- Click text to show translation in English.
+- More upscaled UI.
