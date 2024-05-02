@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Select Language</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/wordbubble.png') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles.css') }}">
     <style>
         body{
             display: flex;
@@ -13,6 +15,28 @@
             width: 100vw;
             background: radial-gradient(circle,#ffffff,#bfbfbf);
             color: black;
+        }
+        select{
+            height: 50px;
+            width: 200px;
+            border-radius: 25px;
+            border: 5px solid #95dc27;
+            margin: 5px;
+        }
+        button{
+            background-color: greenyellow;
+            height: 50px;
+            width: 200px;
+            border-radius: 25px;
+            border: 5px solid #95dc27;
+            margin: 5px;
+            transition: transform 0.2s,background-color 0.05s;
+        }
+        button:hover{
+            transform: scale(1.05);
+        }
+        button:active{
+            background-color: #95dc27;
         }
         .container{
             flex: 1;
