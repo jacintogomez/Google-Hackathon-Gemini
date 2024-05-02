@@ -29,6 +29,7 @@
             flex: 3;
             justify-content: space-around;
             height: 100vh;
+            font-size: 25px;
         }
         .split-right{
             display: flex;
@@ -51,7 +52,7 @@
         }
         .response{
             flex: 1;
-            width: 300px;
+            width: 450px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -119,10 +120,10 @@
         <div id="human" class="response">human text is displayed here</div>
     </div>
     <div class="split-right" style="border: 1px solid #cccccc;">
-        <div id="mic" class="mic">
+        <form id="mic" class="mic">
             <div id="ring" class="ring"></div>
             <div id="rec">Record</div>
-        </div>
+        </form>
         <div>
             <form id="human_form">
                 <button type="submit">Record</button>
@@ -142,8 +143,9 @@
         let ht=document.getElementById('human');
         let mc=document.getElementById('mic');
         let rg=document.getElementById('ring');
-        document.querySelector('#human_form').addEventListener('submit',async function(e){
+        document.querySelector('#mic').addEventListener('click',async function(e){
             e.preventDefault();
+            recording();
             try{
                 const formdata=new FormData(this);
                 const humres=await fetch('/process_human',{
@@ -185,9 +187,6 @@
                 }
             },10);
         }
-        document.querySelector('#mic').addEventListener('click',async function(){
-            recording();
-        });
         async function recording(){
             await Promise.all([emit(),beat(),cname()]);
         }
