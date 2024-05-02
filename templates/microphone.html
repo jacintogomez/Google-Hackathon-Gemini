@@ -38,7 +38,7 @@
             height: 100vh;
         }
         .mic{
-            background-color: tan;
+            background-color: red;
             height: 100px;
             width: 100px;
             border-radius: 50%;
@@ -70,8 +70,10 @@
             width: 100%;
             height: 100%;
             border: 2px solid red;
+            background-color: red;
             border-radius: 50%;
-            animation: emit-ring 1s ease-out forwards;
+            animation: none;
+            visibility: hidden;
         }
         #cursor{
             display: inline-block;
@@ -91,15 +93,20 @@
         }
         @keyframes emit-ring{
             0%{
-                width: 0;
-                height: 0;
-                opacity: 0;
+                width: 100px;
+                height: 100px;
+                opacity: 1;
             }
             100%{
-                width: 200px;
-                height: 200px;
+                width: 150px;
+                height: 150px;
                 opacity: 0;
             }
+        }
+        @keyframes beating{
+            25%{transform: scale(1.2);}
+            50%{transform: scale(1);}
+            75%{transform: scale(1.1);}
         }
         @keyframes blink-caret{
             50%{opacity: 0;}
@@ -113,9 +120,7 @@
     </div>
     <div class="split-right" style="border: 1px solid #cccccc;">
         <div id="mic" class="mic">
-{#            <div id="ring" class="ring">#}
-{#                Begin#}
-{#            </div>#}
+            <div id="ring" class="ring"></div>
             Begin
         </div>
         <div>
@@ -136,6 +141,7 @@
         let mt=document.getElementById('machine');
         let ht=document.getElementById('human');
         let mc=document.getElementById('mic');
+        let rg=document.getElementById('ring');
         document.querySelector('#human_form').addEventListener('submit',async function(e){
             e.preventDefault();
             try{
@@ -179,16 +185,28 @@
                 }
             },10);
         }
-        document.querySelector('#mic').addEventListener('submit',async function(){
-            emit_ring();
+        document.querySelector('#mic').addEventListener('click',async function(){
+            recording();
         });
-        function emit_ring(){
+        function emit(){
             const ring=document.createElement('div');
             ring.classList.add('ring');
             mc.appendChild('ring');
             setTimeout(()=>{
                 ring.remove();
             },1000);
+        }
+        async function recording(){
+            for(let x=0;x<5;x++){
+                rg.style.animation='emit-ring 1s ease-out forwards';
+                rg.style.visibility='visible';
+                mc.style.animation='beating 1s ease-in-out';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                rg.style.animation='none';
+                rg.style.visibility='hidden';
+                mc.style.animation='none';
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
         }
     </script>
 </body>
