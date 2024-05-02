@@ -121,7 +121,7 @@
     <div class="split-right" style="border: 1px solid #cccccc;">
         <div id="mic" class="mic">
             <div id="ring" class="ring"></div>
-            Begin
+            <div id="rec">Record</div>
         </div>
         <div>
             <form id="human_form">
@@ -188,25 +188,31 @@
         document.querySelector('#mic').addEventListener('click',async function(){
             recording();
         });
-        function emit(){
-            const ring=document.createElement('div');
-            ring.classList.add('ring');
-            mc.appendChild('ring');
-            setTimeout(()=>{
-                ring.remove();
-            },1000);
-        }
         async function recording(){
+            await Promise.all([emit(),beat(),cname()]);
+        }
+        async function beat(){
+            for(let x=0;x<4;x++){
+                mc.style.animation='beating 1.25s ease-in-out';
+                await new Promise(resolve=>setTimeout(resolve,1250));
+                mc.style.animation='none';
+                await new Promise(resolve=>setTimeout(resolve,50));
+            }
+        }
+        async function emit(){
             for(let x=0;x<5;x++){
                 rg.style.animation='emit-ring 1s ease-out forwards';
                 rg.style.visibility='visible';
-                mc.style.animation='beating 1s ease-in-out';
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve=>setTimeout(resolve,1000));
                 rg.style.animation='none';
                 rg.style.visibility='hidden';
-                mc.style.animation='none';
-                await new Promise(resolve => setTimeout(resolve, 50));
+                await new Promise(resolve=>setTimeout(resolve,50));
             }
+        }
+        async function cname(){
+            document.getElementById('rec').innerText='Recording...';
+            await new Promise(res=>setTimeout(res,5000));
+            document.getElementById('rec').innerText='Record';
         }
     </script>
 </body>
