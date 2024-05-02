@@ -47,6 +47,7 @@
             align-items: center;
             border: 5px solid black;
             margin: 0 auto;
+            animation: none
         }
         .response{
             flex: 1;
@@ -64,6 +65,14 @@
             animation: none;
             animation-name: none;
         }
+        .ring{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid red;
+            border-radius: 50%;
+            animation: emit-ring 1s ease-out forwards;
+        }
         #cursor{
             display: inline-block;
             width: 2px;
@@ -80,6 +89,18 @@
             50%{transform: translateY(250px);}
             to{transform: translateY(0);}
         }
+        @keyframes emit-ring{
+            0%{
+                width: 0;
+                height: 0;
+                opacity: 0;
+            }
+            100%{
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
         @keyframes blink-caret{
             50%{opacity: 0;}
         }
@@ -91,7 +112,12 @@
         <div id="human" class="response">human text is displayed here</div>
     </div>
     <div class="split-right" style="border: 1px solid #cccccc;">
-        <div id="mic" class="mic">Begin</div>
+        <div id="mic" class="mic">
+{#            <div id="ring" class="ring">#}
+{#                Begin#}
+{#            </div>#}
+            Begin
+        </div>
         <div>
             <form id="human_form">
                 <button type="submit">Record</button>
@@ -109,6 +135,7 @@
     <script>
         let mt=document.getElementById('machine');
         let ht=document.getElementById('human');
+        let mc=document.getElementById('mic');
         document.querySelector('#human_form').addEventListener('submit',async function(e){
             e.preventDefault();
             try{
@@ -151,6 +178,17 @@
                     clearInterval(interval);
                 }
             },10);
+        }
+        document.querySelector('#mic').addEventListener('submit',async function(){
+            emit_ring();
+        });
+        function emit_ring(){
+            const ring=document.createElement('div');
+            ring.classList.add('ring');
+            mc.appendChild('ring');
+            setTimeout(()=>{
+                ring.remove();
+            },1000);
         }
     </script>
 </body>
