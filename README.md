@@ -10,11 +10,13 @@ How to use:
 3. After the conversation ends the user can download a transcript of the conversation text to their device, in case there are any new words/phrases they would like to remember.
 
 How it works:
-- Google Gemini API is used to craft responses to the user input text. Google Vertex AI is used specifically so I could give a system instruction and so that chat history is remembered througout the conversation.
-- Google Translate API is used to translate into and from English.
-- OpenAI Whisper is used to convert the user's speech to text.
-- Audio is played with Pygame.
+- Google Gemini API is used to craft responses to the user input text. Google Vertex AI is used specifically so I could give a system instruction and so that chat history is remembered througout the conversation
+- Google Translate API is used to translate into and from English
+- OpenAI Whisper is used to convert the user's speech to text
+- Audio is played with Pygame
 
 Features to add in the future:
-- Click text to show translation in English.
-- More upscaled UI.
+- Alerts for grammatical mistakes
+- Accent feedback and critiques
+- Click text to show translation in English
+- More upscaled UI
