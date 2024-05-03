@@ -107,7 +107,7 @@ def machine_speak():
 def download_transcript():
     tpath=app.config['transpath']
     if os.path.exists(tpath):
-        return send_file(tpath,attachment_filename='transcript.txt',as_attachment=True)
+        return send_file(tpath,as_attachment=True)
 
 @app.route('/stop_session')
 def stop_session():
