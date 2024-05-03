@@ -1,0 +1,6 @@
+Heroku
+1. Set environment variables: $ heroku config:set TESTVAR=777 -a myappname
+2. Add remote app: $ heroku git:remote -a example-app
+3. Add procfile: echo "web: gunicorn app:app" > Procfile
+4. Install gunicorn: pip install gunicorn
+5. deploy: $ git push heroku master
