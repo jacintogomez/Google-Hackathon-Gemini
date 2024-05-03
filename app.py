@@ -12,12 +12,21 @@ from dotenv import load_dotenv
 import os
 import time
 import pygame
+import base64
+import json
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
 # model=genai.GenerativeModel('gemini-pro')
 # genai.configure(api_key=GOOGLE_API_KEY)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("TRANSLATION_CREDENTIALS_PATH")
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("TRANSLATION_CREDENTIALS_PATH")
+
+credpath=os.getenv("TRANSLATION_CREDENTIALS_PATH")
+decode=base64.b64decode(os.getenv("TRANSLATION_CREDENTIALS_ENCODED"))
+jsondecode=json.loads(decode)
+with open(credpath,'wb') as file:
+    file.write(decode)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=credpath
 
 project_id=os.getenv("CLOUD_PROJECT_ID")
 location=os.getenv("CLOUD_PROJECT_LOCATION")
