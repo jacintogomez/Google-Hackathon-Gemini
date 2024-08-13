@@ -20,3 +20,10 @@ Features to add in the future:
 - Accent feedback and critiques
 - Click text to show translation in English
 - Nicer looking UI
+
+# Steps to run:
+1. Clone the repository
+2. Create a .env file with the environment variables from the .env.template file (this will require a Google Cloud account)
+3. Install requirements by running `pip install -r requirements.txt` in terminal
+4. Run `python app.py` to start the server
+5. Visit the localhost link shown in terminal

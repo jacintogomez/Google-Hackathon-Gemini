@@ -4,3 +4,5 @@ Heroku
 3. Add procfile: echo "web: gunicorn app:app" > Procfile
 4. Install gunicorn: pip install gunicorn
 5. deploy: $ git push heroku master
+
+base64 -i [input-file] -o [target-file]
