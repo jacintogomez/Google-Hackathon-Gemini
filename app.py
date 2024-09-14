@@ -1,19 +1,17 @@
+import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
-import google.generativeai as genai
-from google.cloud import translate_v2 as translate
-import torch
 import sounddevice as sd
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 from scipy.io.wavfile import write
 from google.cloud import texttospeech
 import vertexai
 from vertexai.generative_models import GenerativeModel, ChatSession
 from dotenv import load_dotenv
 import os
-import time
 import pygame
 import base64
 import json
+import speech_recognition as sr
+import scipy.io.wavfile as wav
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
@@ -39,27 +37,27 @@ model=GenerativeModel(
 )
 chat=model.start_chat(response_validation=False)
 
-device="cuda:0" if torch.cuda.is_available() else "cpu"
-torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
-model_id="openai/whisper-base"
-openaimodel=AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_id,torch_dtype=torch_dtype,
-    use_safetensors=True
-)
-openaimodel.to(device)
-processor=AutoProcessor.from_pretrained(model_id)
-pipe=pipeline(
-    "automatic-speech-recognition",
-    model=openaimodel,
-    tokenizer=processor.tokenizer,
-    feature_extractor=processor.feature_extractor,
-    max_new_tokens=128,
-    chunk_length_s=30,
-    batch_size=16,
-    return_timestamps=True,
-    torch_dtype=torch_dtype,
-    device=device,
-)
+# device="cuda:0" if torch.cuda.is_available() else "cpu"
+# torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+# model_id="openai/whisper-base"
+# openaimodel=AutoModelForSpeechSeq2Seq.from_pretrained(
+#     model_id,torch_dtype=torch_dtype,
+#     use_safetensors=True
+# )
+# openaimodel.to(device)
+# processor=AutoProcessor.from_pretrained(model_id)
+# pipe=pipeline(
+#     "automatic-speech-recognition",
+#     model=openaimodel,
+#     tokenizer=processor.tokenizer,
+#     feature_extractor=processor.feature_extractor,
+#     max_new_tokens=128,
+#     chunk_length_s=30,
+#     batch_size=16,
+#     return_timestamps=True,
+#     torch_dtype=torch_dtype,
+#     device=device,
+# )
 
 app = Flask(__name__)
 
@@ -170,13 +168,49 @@ def human_turn():
     # print('Me: '+talk+' ('+eng+')')
     return talk
 
+def speechtotext(filename):
+    recognizer=sr.Recognizer()
+    with sr.AudioFile(filename) as source:
+        audio=recognizer.record(source)
+    try:
+        text=recognizer.recognize_google(audio)
+        return text
+    except sr.UnknownValueError:
+        return 'Could not understand audio'
+    except sr.RequestError as e:
+        return 'Could not request results from Google Speech Recognition service'
+
 def record_audio(filename,duration=5,fs=44100):
     print('recording...')
     recording=sd.rec(int(duration*fs),samplerate=fs,channels=1)
     sd.wait()
-    write(filename,fs,recording)
-    result=pipe(filename,generate_kwargs={'language':app.config['chosenlang']})
-    return result['text']
+    normalized=np.int16(recording*32767)
+    wav.write(filename,fs,normalized)
+    return speechtotext(filename)
+
+# def record_audio(filename):
+#     duration=5
+#     sample_rate=44100
+#     channels=1
+#     print('Recording...')
+#     audio_data=sd.rec(int(duration*sample_rate),samplerate=sample_rate,channels=channels)
+#     sd.wait()
+#     print('Recording finished')
+#     with wave.open(filename,'wb') as wf:
+#         wf.setnchannels(channels)
+#         wf.setsampwidth(2)
+#         wf.setframerate(sample_rate)
+#         wf.writeframes(audio_data.tobytes())
+#     recognizer=sr.Recognizer()
+#     try:
+#         with sr.AudioFile(filename) as source:
+#             audio=recognizer.record(source)
+#         text=recognizer.recognize_google(audio)
+#         return text
+#     except sr.UnknownValueError:
+#         return 'Could not understand audio'
+#     except sr.RequestError as e:
+#         return 'Could not request results from Google Speech Recognition service'
 
 def updatetrans(line,isme):
     pre=''
@@ -220,4 +254,4 @@ def displaylang(l):
     return c
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
