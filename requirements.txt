@@ -26,6 +26,7 @@ googleapis-common-protos==1.65.0
 grpc-google-iam-v1==0.13.1
 grpcio==1.66.1
 grpcio-status==1.66.1
+gunicorn==23.0.0
 httplib2==0.22.0
 idna==3.9
 itsdangerous==2.2.0

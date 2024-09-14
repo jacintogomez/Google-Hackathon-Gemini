@@ -1,6 +1,6 @@
 Heroku
 
-0. Enter Heroku console:
+0. Enter Heroku console: heroku login
 
 1. Set environment variables: $ heroku config:set TESTVAR=777 -a myappname
 2. Add remote app: $ heroku git:remote -a example-app
