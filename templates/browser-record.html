@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Capture</title>
+</head>
+<body>
+
+<button onclick="startRecording()">Start Recording</button>
+
+<script>
+    function startRecording() {
+        // Check if the browser supports audio capture
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Request access to the microphone
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    // Create a MediaRecorder instance to capture the audio
+                    const mediaRecorder = new MediaRecorder(stream);
+                    const audioChunks = []; // Store recorded audio chunks
+
+                    // Start recording
+                    mediaRecorder.start();
+
+                    // Capture audio data when available
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    // When recording stops, process the audio data
+                    mediaRecorder.addEventListener("stop", () => {
+                        // Create a blob from the audio data
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+
+                        // Create an audio element to play back the recorded audio
+                        const audio = new Audio(audioUrl);
+                        audio.controls = true;
+                        document.body.appendChild(audio); // Add to the DOM
+                        audio.play();
+                    });
+
+                    // Stop recording after a set time (e.g., 5 seconds)
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                    }, 5000); // Adjust duration as needed
+                })
+                .catch(error => {
+                    console.error("Error accessing audio input:", error);
+                });
+        } else {
+            console.warn("Your browser does not support audio capture.");
+        }
+    }
+</script>
+
+</body>
+</html>

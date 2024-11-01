@@ -112,6 +112,16 @@ def stop_session():
     pygame.quit()
     return 'Pygame session stopped'
 
+@app.route('/upload_audio',methods=['POST'])
+def upload_audio():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'No audio file'}), 400
+    audiofile=request.files['audio']
+    filename='recordings/human.wav'
+    audiofile.save(filename)
+    transcription=speechtotext(filename)
+    return jsonify({'transcription':transcription})
+
 def get_chat_response(chat: ChatSession,prompt: str) -> str:
     text_response=[]
     print('prompt: '+prompt)
@@ -181,36 +191,12 @@ def speechtotext(filename):
         return 'Could not request results from Google Speech Recognition service'
 
 def record_audio(filename,duration=5,fs=44100):
-    print('recording...')
-    recording=sd.rec(int(duration*fs),samplerate=fs,channels=1)
-    sd.wait()
-    normalized=np.int16(recording*32767)
-    wav.write(filename,fs,normalized)
+    # print('recording...')
+    # recording=sd.rec(int(duration*fs),samplerate=fs,channels=1)
+    # sd.wait()
+    # normalized=np.int16(recording*32767)
+    # wav.write(filename,fs,normalized)
     return speechtotext(filename)
-
-# def record_audio(filename):
-#     duration=5
-#     sample_rate=44100
-#     channels=1
-#     print('Recording...')
-#     audio_data=sd.rec(int(duration*sample_rate),samplerate=sample_rate,channels=channels)
-#     sd.wait()
-#     print('Recording finished')
-#     with wave.open(filename,'wb') as wf:
-#         wf.setnchannels(channels)
-#         wf.setsampwidth(2)
-#         wf.setframerate(sample_rate)
-#         wf.writeframes(audio_data.tobytes())
-#     recognizer=sr.Recognizer()
-#     try:
-#         with sr.AudioFile(filename) as source:
-#             audio=recognizer.record(source)
-#         text=recognizer.recognize_google(audio)
-#         return text
-#     except sr.UnknownValueError:
-#         return 'Could not understand audio'
-#     except sr.RequestError as e:
-#         return 'Could not request results from Google Speech Recognition service'
 
 def updatetrans(line,isme):
     pre=''
