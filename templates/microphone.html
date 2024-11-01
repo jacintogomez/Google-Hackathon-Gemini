@@ -157,7 +157,7 @@
         function startrecording(){
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
                 navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-                    const mediarecorder=new MediaRecorder(stream);
+                    const mediarecorder=new MediaRecorder(stream,{mineType:'audio/wav'});
                     const audiochunks=[];
                     mediarecorder.start();
                     mediarecorder.addEventListener('dataavailable',event=>{
@@ -177,9 +177,20 @@
                 console.warn('your browser does not support audio capture');
             }
         }
+        function uploadaudio(audioblob){
+            const formdata=new FormData();
+            formdata.append('audio',audioblob,'recording.wav');
+            fetch('/upload_audio',{
+                method:'POST',
+                body:formdata
+            }).then(response=>response.json()).catch(error=>{
+                console.error('error uploading audio: ',error);
+            });
+        }
         document.querySelector('#mic').addEventListener('click',async function(e){
             e.preventDefault();
             recordinganimations();
+            startrecording()
             try{
                 const formdata=new FormData(this);
                 const humres=await fetch('/process_human',{
