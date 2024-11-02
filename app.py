@@ -11,8 +11,11 @@ import pygame
 import base64
 import json
 import time
+from openai import OpenAI
 import speech_recognition as sr
 import scipy.io.wavfile as wav
+import whisper
+from pathlib import Path
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
@@ -37,6 +40,7 @@ model=GenerativeModel(
     ],
 )
 chat=model.start_chat(response_validation=False)
+client=OpenAI()
 
 # device="cuda:0" if torch.cuda.is_available() else "cpu"
 # torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
@@ -224,16 +228,87 @@ def human_turn():
     return talk
 
 def speechtotext(filename):
-    recognizer=sr.Recognizer()
-    with sr.AudioFile(filename) as source:
-        audio=recognizer.record(source)
+    # recognizer=sr.Recognizer()
+    # with sr.AudioFile(filename) as source:
+    #     audio=recognizer.record(source)
+    # try:
+    #     text=recognizer.recognize_google(audio)
+    #     return text
+    # except sr.UnknownValueError:
+    #     return 'Could not understand audio'
+    # except sr.RequestError as e:
+    #     return 'Could not request results from Google Speech Recognition service'
+    """
+    Convert speech to text using OpenAI's Whisper model.
+
+    Args:
+        filename (str): Path to the audio file
+
+    Returns:
+        str: Transcribed text or error message
+    """
+    # try:
+    #     # Check if file exists
+    #     if not Path(filename).is_file():
+    #         return "Error: Audio file not found"
+    #
+    #     # Load the model (first run will download the model)
+    #     model = whisper.load_model("base")  # Other options: "tiny", "small", "medium", "large"
+    #
+    #     # Transcribe audio
+    #     result = model.transcribe(filename)
+    #
+    #     return result["text"].strip()
+    #
+    # except Exception as e:
+    #     return f"Error during transcription: {str(e)}"
+    audio_file=open(filename, "rb")
+    transcription = client.audio.transcriptions.create(
+      model="whisper-1",
+      file=audio_file
+    )
+    print(transcription.text)
+    return transcription.text
+
+def convertaudioforwhisper(input_file, output_file=None):
+    """
+    Convert audio file to format compatible with Whisper API.
+    Args:
+        input_file: Path to input audio file
+        output_file: Path to save converted file (optional)
+    Returns:
+        Path to converted audio file
+    """
+    from pydub import AudioSegment
+
+    if output_file is None:
+        output_file = input_file
+
     try:
-        text=recognizer.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        return 'Could not understand audio'
-    except sr.RequestError as e:
-        return 'Could not request results from Google Speech Recognition service'
+        # Load audio file
+        audio = AudioSegment.from_wav(input_file)
+
+        # Convert to proper format
+        # - Sample width of 2 bytes (16 bit)
+        # - Sample rate of 16kHz
+        # - Single channel (mono)
+        audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
+
+        # Export with specific parameters
+        audio.export(
+            output_file,
+            format="wav",
+            parameters=[
+                "-ac", "1",  # mono
+                "-ar", "16000",  # 16kHz
+                "-sample_fmt", "s16",  # 16-bit
+                "-acodec", "pcm_s16le"  # PCM signed 16-bit little-endian
+            ]
+        )
+        return output_file
+    except Exception as e:
+        print(f"Error converting audio: {str(e)}")
+        return None
 
 def record_audio(filename,duration=5,fs=44100):
     # print('recording...')
@@ -241,7 +316,8 @@ def record_audio(filename,duration=5,fs=44100):
     # sd.wait()
     # normalized=np.int16(recording*32767)
     # wav.write(filename,fs,normalized)
-    return speechtotext(filename)
+    converted=convertaudioforwhisper(filename)
+    return speechtotext(converted)
 
 def updatetrans(line,isme):
     pre=''
