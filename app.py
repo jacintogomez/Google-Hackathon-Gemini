@@ -10,6 +10,7 @@ import os
 import pygame
 import base64
 import json
+import time
 import speech_recognition as sr
 import scipy.io.wavfile as wav
 
@@ -83,7 +84,8 @@ def conversation(language):
 
 @app.route('/process_human',methods=['POST'])
 def process_intermediate():
-    #human_response=request.form['human_input']
+    if os.path.exists('recordings/human.wav'):
+        os.remove('recordings/human.wav')
     human_response=human_turn()
     app.config['temp_msg']=human_response
     return jsonify(human_response=human_response)
@@ -112,15 +114,56 @@ def stop_session():
     pygame.quit()
     return 'Pygame session stopped'
 
-@app.route('/upload_audio',methods=['POST'])
+@app.route('/upload_audio', methods=['POST'])
 def upload_audio():
     if 'audio' not in request.files:
-        return jsonify({'error': 'No audio file'}), 400
-    audiofile=request.files['audio']
-    filename='recordings/human.wav'
-    audiofile.save(filename)
-    transcription=speechtotext(filename)
-    return jsonify({'transcription':transcription})
+        return jsonify({'error':'no audio file'}),400
+    try:
+        audiofile=request.files['audio']
+        filename='recordings/human.wav'
+        os.makedirs('recordings',exist_ok=True)
+        if os.path.exists(filename):
+            os.remove(filename)
+        audiofile.save(filename)
+        if not os.path.exists(filename):
+            return jsonify({'error':'file not saved properly'}),500
+        try:
+            from pydub import AudioSegment
+            audio=AudioSegment.from_wav(filename)
+            audio.export(filename, format='wav', parameters=['-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '1']) #line copied in from Claude
+        except Exception as e:
+            print(f'Error converting audio: {str(e)}')
+        return jsonify({'success':True})
+    except Exception as e:
+        print(f'Error processing audio: {str(e)}')
+        return jsonify({'error':False}),500
+    # if 'audio' not in request.files:
+    #     return jsonify({'error': 'No audio file'}), 400
+    #
+    # try:
+    #     audiofile = request.files['audio']
+    #     filename = 'recordings/human.wav'
+    #
+    #     # Save the file
+    #     audiofile.save(filename)
+    #
+    #     # Verify the file was saved and is readable
+    #     if not os.path.exists(filename):
+    #         return jsonify({'error': 'File not saved properly'}), 500
+    #
+    #     # Convert to correct format if needed
+    #     try:
+    #         from pydub import AudioSegment
+    #         audio = AudioSegment.from_wav(filename)
+    #         audio.export(filename, format='wav', parameters=['-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '1'])
+    #     except Exception as e:
+    #         print(f"Error converting audio: {str(e)}")
+    #
+    #     transcription = speechtotext(filename)
+    #     return jsonify({'transcription': transcription})
+    # except Exception as e:
+    #     print(f"Error processing audio: {str(e)}")
+    #     return jsonify({'error': str(e)}), 500
 
 def get_chat_response(chat: ChatSession,prompt: str) -> str:
     text_response=[]
@@ -171,6 +214,8 @@ def play_audio(file):
 
 def human_turn():
     file='recordings/human.wav'
+    while not os.path.exists(file):
+        time.sleep(0.1)
     talk=record_audio(file)
     updatetrans(talk,True)
     print('human response: ',talk)

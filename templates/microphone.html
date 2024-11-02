@@ -156,25 +156,42 @@
         let rg=document.getElementById('ring');
         function startrecording(){
             if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-                navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-                    const mediarecorder=new MediaRecorder(stream,{mimeType:'audio/wav'});
-                    const audiochunks=[];
-                    mediarecorder.start();
-                    mediarecorder.addEventListener('dataavailable',event=>{
+                navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+                    // Use audio/webm which is widely supported
+                    const mediarecorder = new MediaRecorder(stream);
+                    const audiochunks = [];
+
+                    mediarecorder.addEventListener('dataavailable', event => {
                         audiochunks.push(event.data);
                     });
-                    mediarecorder.addEventListener('stop',()=>{
-                        const audioblob=new Blob(audiochunks,{type:'audio/wav'});
-                        uploadaudio(audioblob);
+
+                    mediarecorder.addEventListener('stop', () => {
+                        // Convert to wav format using AudioContext
+                        const audioBlob = new Blob(audiochunks);
+                        const audioContext = new AudioContext();
+                        const fileReader = new FileReader();
+
+                        fileReader.onload = async function() {
+                            const arrayBuffer = this.result;
+                            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                            // Convert to WAV
+                            const wavBuffer = audioBufferToWav(audioBuffer);
+                            const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+                            uploadaudio(wavBlob);
+                        };
+
+                        fileReader.readAsArrayBuffer(audioBlob);
                     });
-                    setTimeout(()=>{
+
+                    mediarecorder.start();
+                    setTimeout(() => {
                         mediarecorder.stop();
-                    },5000);
-                }).catch(error=>{
-                    console.error('error accessing audio input: ',error);
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 5000);
+                }).catch(error => {
+                    console.error('error accessing audio input: ', error);
                 });
-            }else{
-                console.warn('your browser does not support audio capture');
             }
         }
         function uploadaudio(audioblob){
@@ -203,7 +220,7 @@
         document.querySelector('#mic').addEventListener('click',async function(e){
             e.preventDefault();
             recordinganimations();
-            startrecording()
+            await startrecording()
             try{
                 const formdata=new FormData(this);
                 const humres=await fetch('/process_human',{
@@ -272,6 +289,58 @@
             document.getElementById('rec').innerText='Recording...';
             await new Promise(res=>setTimeout(res,5000));
             document.getElementById('rec').innerText='Record';
+        }
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2;
+            const outputBuffer = new ArrayBuffer(44 + length);  // Renamed from 'buffer' to 'outputBuffer'
+            const view = new DataView(outputBuffer);
+            const channels = [];
+            let sample;
+            let offset = 0;
+            let pos = 0;
+
+            // Write WAV header
+            setUint32(0x46464952);                         // "RIFF"
+            setUint32(36 + length);                        // file length
+            setUint32(0x45564157);                         // "WAVE"
+            setUint32(0x20746D66);                         // "fmt " chunk
+            setUint32(16);                                 // length = 16
+            setUint16(1);                                  // PCM (uncompressed)
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan);  // avg. bytes/sec
+            setUint16(numOfChan * 2);                      // block-align
+            setUint16(16);                                 // 16-bit
+            setUint32(0x61746164);                         // "data" chunk
+            setUint32(length);                             // chunk length
+
+            // Write interleaved data
+            for(let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            while(pos < buffer.length) {
+                for(let i = 0; i < numOfChan; i++) {
+                    sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767)|0;
+                    view.setInt16(44 + offset, sample, true);
+                    offset += 2;
+                }
+                pos++;
+            }
+
+            return outputBuffer;  // Return outputBuffer instead of buffer
+
+            function setUint16(data) {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            }
+
+            function setUint32(data) {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            }
         }
     </script>
 </body>
