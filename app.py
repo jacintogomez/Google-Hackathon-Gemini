@@ -1,7 +1,4 @@
-import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
-import sounddevice as sd
-from scipy.io.wavfile import write
 from google.cloud import texttospeech
 import vertexai
 from vertexai.generative_models import GenerativeModel, ChatSession
@@ -12,10 +9,6 @@ import base64
 import json
 import time
 from openai import OpenAI
-import speech_recognition as sr
-import scipy.io.wavfile as wav
-import whisper
-from pathlib import Path
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
