@@ -4,7 +4,6 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, ChatSession
 from dotenv import load_dotenv
 import os
-import pygame
 import base64
 import json
 import time
@@ -76,7 +75,7 @@ def process_language():
 @app.route('/conversation/<language>',methods=['GET'])
 def conversation(language):
     cleartranscript()
-    pygame.init()
+    #pygame.init()
     return render_template('microphone.html',language=displaylang(language))
 
 @app.route('/process_human',methods=['POST'])
@@ -97,8 +96,9 @@ def process_machine():
 @app.route('/machine_speak')
 def machine_speak():
     mf='recordings/machine.wav'
-    play_audio(mf)
-    return 'Audio playing'
+    # play_audio(mf)
+    # return 'Audio playing'
+    return send_file(mf,mimetype='audio/wav')
 
 @app.route('/session/trans.txt')
 def download_transcript():
@@ -108,7 +108,7 @@ def download_transcript():
 
 @app.route('/stop_session')
 def stop_session():
-    pygame.quit()
+    #pygame.quit()
     return 'Pygame session stopped'
 
 @app.route('/upload_audio', methods=['POST'])
@@ -203,11 +203,11 @@ def make_speech_file(speech_file_path,text):
         out.write(response.audio_content)
         print('Audio content written to '+speech_file_path)
 
-def play_audio(file):
-    sound=pygame.mixer.Sound(file)
-    recordlength=int(sound.get_length()*1000)
-    sound.play()
-    pygame.time.wait(recordlength)
+# def play_audio(file):
+#     sound=pygame.mixer.Sound(file)
+#     recordlength=int(sound.get_length()*1000)
+#     sound.play()
+#     pygame.time.wait(recordlength)
 
 def human_turn():
     file='recordings/human.wav'
@@ -354,4 +354,8 @@ def displaylang(l):
     return c
 
 if __name__ == '__main__':
+    # This is for remote EC2
     app.run(host='0.0.0.0', port=5000)
+
+    # And this is for running locally
+    #app.run(debug=True)

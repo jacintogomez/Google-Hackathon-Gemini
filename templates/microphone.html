@@ -201,21 +201,25 @@
                 method:'POST',
                 body:formdata
             })
-                .then(response=>{
-                    if(!response.ok){
-                        throw new Error('network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data=>{
-                    console.log('upload successful: ',data);
-                    if(data.transcription){
-                        console.log('uploaded');
-                    }
-                })
-                .catch(error=>{
-                    console.error('error uploading audio: ',error);
-                });
+            .then(response=>{
+                if(!response.ok){
+                    throw new Error('network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data=>{
+                console.log('upload successful: ',data);
+                if(data.transcription){
+                    console.log('uploaded');
+                }
+            })
+            .catch(error=>{
+                console.error('error uploading audio: ',error);
+            });
+        }
+        function playaudioresponse(audioblob){
+            const audio=new Audio(URL.createObjectURL(audioblob));
+            audio.play();
         }
         document.querySelector('#mic').addEventListener('click',async function(e){
             e.preventDefault();
@@ -242,7 +246,7 @@
                 }
                 const machtx=await machres.json();
                 typedisplay(machtx.machine_response,mt);
-                fetch('/machine_speak')
+                fetch('/machine_speak').then(response=>response.blob()).then(blob=>playaudioresponse(blob));
             }catch(error){
                 alert('Sorry, an error occurred: '+error.message);
             }
