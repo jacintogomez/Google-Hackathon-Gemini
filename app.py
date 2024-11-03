@@ -8,6 +8,7 @@ import base64
 import json
 import time
 from openai import OpenAI
+import ssl
 
 load_dotenv()
 GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY")
@@ -57,6 +58,11 @@ client=OpenAI()
 # )
 
 app = Flask(__name__)
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 app.config['chosenlang']='en' #this will change during execution
 app.config['temp_msg']='Hello, how are you today?' #this too
@@ -355,6 +361,8 @@ def displaylang(l):
 
 if __name__ == '__main__':
     # This is for remote EC2
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain('certs/cert.pem', 'certs/key.pem')
     app.run(host='0.0.0.0', port=5000)
 
     # And this is for running locally
