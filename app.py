@@ -360,22 +360,23 @@ def displaylang(l):
     return c
 
 if __name__ == '__main__':
-    # This is for remote EC2
+    # # This is for remote EC2
+    # # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # # context.load_cert_chain('certs/cert.pem', 'certs/key.pem')
     # context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    # context.load_cert_chain('certs/cert.pem', 'certs/key.pem')
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.maximum_version = ssl.TLSVersion.TLSv1_3
-
-    try:
-        context.load_cert_chain('certs/cert.pem', 'certs/key.pem')
-        print("Successfully loaded SSL certificate")
-    except Exception as e:
-        print(f"Error loading certificate: {e}")
-        exit(1)
-
-    print("Starting Flask server with SSL...")
-    app.run(host='0.0.0.0', port=5000, ssl_context=context, debug=True)
+    # context.minimum_version = ssl.TLSVersion.TLSv1_2
+    # context.maximum_version = ssl.TLSVersion.TLSv1_3
+    #
+    # try:
+    #     context.load_cert_chain('certs/cert.pem', 'certs/key.pem')
+    #     print("Successfully loaded SSL certificate")
+    # except Exception as e:
+    #     print(f"Error loading certificate: {e}")
+    #     exit(1)
+    #
+    # print("Starting Flask server with SSL...")
+    #app.run(host='0.0.0.0', port=5000, ssl_context=context, debug=True)
+    #app.run(host='0.0.0.0', port=5000, debug=True)
 
     # And this is for running locally
-    #app.run(debug=True)
+    app.run(debug=True)

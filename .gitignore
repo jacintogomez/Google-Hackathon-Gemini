@@ -6,3 +6,4 @@ session/*
 !session/.gitkeep
 session/trans.txt
 ssh.txt
+service.txt

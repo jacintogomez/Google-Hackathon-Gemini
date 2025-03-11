@@ -1,0 +1,45 @@
+[Unit]
+Description=Flask App
+After=network.target multi-user.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/app
+ExecStart=/home/ubuntu/venv/bin/python app.py
+Restart=always
+Environment=FLASK_ENV=production
+EnvironmentFile=/etc/app.env
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=myapp
+
+[Install]
+WantedBy=multi-user.target
+
+if caddy file fails:
+sudo systemctl stop nginx //maybe???
+
+caddy permission denied:
+sudo chmod 600 /home/ubuntu/app/certs/mycert.crt /home/ubuntu/app/certs/mykey.key
+
+:443 {
+    tls /etc/ssl/mycerts/mycert.crt /etc/ssl/mycerts/mykey.key
+    reverse_proxy localhost:5000
+}
+^ that doesnt seem to work but the below does??
+:80, :443 {
+    tls internal {
+        on_demand
+    }
+
+    reverse_proxy localhost:5000
+}
+3.85.34.29 {
+    tls internal {
+        on_demand
+    }
+
+    reverse_proxy localhost:5000
+}
+
+
